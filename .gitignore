@@ -1,0 +1,6 @@
+# Unimportant shit
+*.pyc
+*.dvi
+*.aux
+*.pdf
+*.log
