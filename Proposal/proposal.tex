@@ -38,11 +38,7 @@ build_tree(E, F):
 \caption{Taken from Introduction to Datamining by Tan, Steinback, Kumar}
 \end{figure}
 
-OC1 is special because of its splitting criterion; finding
-\begin{align*}
-\sum\limits_{i=1}^{d}a_i x_i + a_{d+1} > 0
-\end{align*}
-at every node, where $a_1, \ldots, a_{d+1}$ are real-valued coefficients. Since these tests are equivalent to hyperplanes at an oblique orientation to the axes, this class of decision trees is called \emph{oblique}.
+OC1 is special because it allows test conditions that allow more than attribute, and thus can model complex relations among continuous attributes. Classifiers like ID3 only work well for discrete attributes and allow test conditions that only involve a single attribute at a time.
 
 \section*{Dataset}
 We're thinking of using the following two datasets to train our implementation. These are often used datasets (the iris set is even part of the sklearn package for Python), so we think they'll be great to test on.
