@@ -2,30 +2,60 @@
 
 \usepackage{fancyhdr}
 \usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
 \usepackage[margin=1.2in]{geometry}
 \lhead{K. Dercksen, M. K\"onings}
 \chead{4215966 - xxxxxxx}
-\rhead{Datamining proposal}
+\rhead{Datamining Project Proposal}
 \cfoot{\thepage}
 \pagestyle{fancy}
 
+\hypersetup{colorlinks=true, urlcolor=blue}
+
 \begin{document}
 
-    We've chosen to implement an algorithm.
+We will be implementing OC1, a system for induction of oblique decision trees. OC1 works by finding oblique splits (hyperplanes) for each node of a decision tree. These trees are especially meant for data with numeric attributes.
 
-    \section*{Algorithm}
-    Oblique Decision Tree induction.
-    \begin{align*}
-        \sum_{i=1}^{d}a_i x_i + a_{d+1} > 0 
-    \end{align*}
+\section*{Algorithm}
+Basic decision tree induction algorithms look like the following (consider training records $E$ and attribute set $F$):
+\begin{figure}[h!]
+\begin{lstlisting}[frame=single]
+build_tree(E, F):
+  if stopping_condition is true:
+    leaf = new node
+    leaf:label = classify(E)
+    return leaf
+  root = new node
+  root:test_condition = best_split(E, F)
+  let V = {v | v is a possible outcome of root:test_condition}
+  for each v in V:
+    E_v = {e | root:test_condition(e) = v and e in E}
+    child = build_tree(E_v, F)
+    add child as descendent of root and label edge (root -> child) as v
+  return root
+\end{lstlisting}
+\caption{Taken from Introduction to Datamining by Tan, Steinback, Kumar}
+\end{figure}
 
-    \section*{Dataset}
-    Fisher's \emph{iris} data set? \\
-    http://en.wikipedia.org/wiki/Iris\_flower\_data\_set \\
-    https://archive.ics.uci.edu/ml/datasets/ISOLET \\
+OC1 is special because of its splitting criterion; finding
+\begin{align*}
+\sum\limits_{i=1}^{d}a_i x_i + a_{d+1} > 0
+\end{align*}
+at every node, where $a_1, \ldots, a_{d+1}$ are real-valued coefficients. Since these tests are equivalent to hyperplanes at an oblique orientation to the axes, this class of decision trees is called \emph{oblique}.
 
-    \section*{Literature}
-    http://www.jair.org/media/63/live-63-1401-jair.pdf \\
-    http://sci2s.ugr.es/keel/pdf/algorithm/articulo/Oblique-DT.pdf \\
+\section*{Dataset}
+We're thinking of using the following two datasets to train our implementation. These are often used datasets (the iris set is even part of the sklearn package for Python), so we think they'll be great to test on.
+
+\href{http://en.wikipedia.org/wiki/Iris\_flower\_data\_set}{Iris flower data set.}
+
+\href{https://archive.ics.uci.edu/ml/datasets/ISOLET}{ISOLET data set.}
+
+\section*{Literature}
+Literature that'll guide our implementation (at least we think so):
+
+\href{http://www.jair.org/media/63/live-63-1401-jair.pdf}{A System for Induction of Oblique Decision Trees.}
+
+\href{http://sci2s.ugr.es/keel/pdf/algorithm/articulo/Oblique-DT.pdf}{Inducing Oblique Decision Trees with Evolutionary Algorithms.}
 
 \end{document}
