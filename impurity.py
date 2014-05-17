@@ -1,3 +1,4 @@
+# Koen Dercksen - 4215966
 # Module containing impurity metrics.
 
 from collections import defaultdict
