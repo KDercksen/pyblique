@@ -1,16 +1,19 @@
 # Koen Dercksen - 4215966
 # Module containing impurity metrics.
 
-from collections import defaultdict
+from collections import Counter
 from math import log
+import sys
 
 
 def frequencies(data, target_attr):
-    freq = defaultdict(int)
-    n_records = float(len(data))
-    for record in data:
-        freq[record[target_attr]] += 1/n_records
-    return freq
+    try:
+        c = Counter(data[:, target_attr])
+        n_records = float(len(data))
+        return {k: v/n_records for k, v in c.items()}
+    except TypeError:
+        sys.stderr.write("Please use Numpy arrays!")
+        sys.exit()
 
 
 def entropy(data, target_attr):
