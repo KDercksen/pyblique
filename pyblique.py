@@ -1,5 +1,6 @@
 # Koen Dercksen - 4215966
 # import impurity
+
 import numpy as np
 import sys
 
@@ -39,8 +40,6 @@ class ObliqueClassifier:
 
             a = [[1], [2], [3], [4]]
             splits = possible_splits(a, 0)
-
-        splits will be a generator that yields [1.5, 2.5, 3.5].
 
         Arguments:
         ----------
@@ -89,3 +88,23 @@ class ObliqueClassifier:
         n_attrs = data.shape[1] - 1
         result = [self.best_ap_split(data, i, metric) for i in range(n_attrs)]
         return np.array(result)
+
+    def split_data(data, attr, threshold):
+        """Return two lists containing the daata split.
+        The first list contains all records where the specified attribute is
+        less than or equal to a given threshold.
+        The second list contains all records where the specified attribute is
+        greater than a given threshold.
+
+        Arguments:
+        ----------
+        data: array-like
+            The dataset.
+        attr: int
+            The attribute to split on.
+        threshold: float
+            Threshold to use for splitting.
+        """
+        low = [r for r in data if r[attr] <= threshold]
+        high = [r for r in data if r[attr] > threshold]
+        return low, high
