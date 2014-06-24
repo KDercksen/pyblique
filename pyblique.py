@@ -43,32 +43,6 @@ class ObliqueClassifier:
         self.metric = metric
         self.tree = {}
 
-    def __fit(self, data):
-        isleaf, leaf = self.__is_leaf_node(data)
-        if len(data) == 0:
-            return -1
-        elif isleaf:
-            return leaf
-        else:
-            # Find best axis parallel split.
-            # First find the best splits for each attribute.
-            splitv = self.__get_split_vector(data)
-            # print("Split vector found: {}".format(splitv))
-            # Now find the index of the best attribute to actually split on
-            index, split = min(enumerate(splitv), key=lambda x: x[1][1])
-            # print("Index, split: {}, {}".format(index, split))
-            # put stuff in the tree
-            tree = {"index": index, "split": split[0]}
-            # split the data for recursive training
-            low, high = self.__split_data(data, index, split[0])
-            # print("Low: {}".format(low))
-            # print("High: {}".format(high))
-            subtree_low = self.__fit(low)
-            tree["low"] = subtree_low
-            subtree_high = self.__fit(high)
-            tree["high"] = subtree_high
-        return tree
-
     def fit(self, data):
         self.tree = self.__fit(data)
 
@@ -82,6 +56,23 @@ class ObliqueClassifier:
             else:
                 cls = cls["high"]
         return cls
+
+    def __fit(self, data):
+        isleaf, leaf = self.__is_leaf_node(data)
+        if len(data) == 0:
+            return -1
+        elif isleaf:
+            return leaf
+        else:
+            splitv = self.__get_split_vector(data)
+            index, split = min(enumerate(splitv), key=lambda x: x[1][1])
+            tree = {"index": index, "split": split[0]}
+            low, high = self.__split_data(data, index, split[0])
+            subtree_low = self.__fit(low)
+            tree["low"] = subtree_low
+            subtree_high = self.__fit(high)
+            tree["high"] = subtree_high
+        return tree
 
     def __best_split_on_attr(self, data, attr):
         # Will return a tuple of (split test, split value).
