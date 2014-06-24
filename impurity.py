@@ -7,6 +7,8 @@ import sys
 
 
 def frequencies(data, target_attr):
+    if len(data) == 0:
+        return {}
     try:
         c = Counter(data[:, target_attr])
         n_records = float(len(data))
