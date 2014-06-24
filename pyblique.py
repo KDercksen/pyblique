@@ -44,7 +44,7 @@ class ObliqueClassifier:
         self.tree = {}
 
     def fit(self, data):
-        self.tree = self.__fit(data)
+        self.tree = self.__create_decision_tree(data)
 
     def predict(self, record):
         cls = self.tree
@@ -57,7 +57,7 @@ class ObliqueClassifier:
                 cls = cls["high"]
         return cls
 
-    def __fit(self, data):
+    def __create_decision_tree(self, data):
         isleaf, leaf = self.__is_leaf_node(data)
         if len(data) == 0:
             return -1
@@ -68,9 +68,9 @@ class ObliqueClassifier:
             index, split = min(enumerate(splitv), key=lambda x: x[1][1])
             tree = {"index": index, "split": split[0]}
             low, high = self.__split_data(data, index, split[0])
-            subtree_low = self.__fit(low)
+            subtree_low = self.__create_decision_tree(low)
             tree["low"] = subtree_low
-            subtree_high = self.__fit(high)
+            subtree_high = self.__create_decision_tree(high)
             tree["high"] = subtree_high
         return tree
 
@@ -104,22 +104,36 @@ class ObliqueClassifier:
         return all(label == label_all for label in labels), label_all
 
 
+def cross_validate(data, n=10):
+    # Return mean classification error, mean squared errors
+    if len(data) < n:
+        sys.stderr.write("Not enough data to perform {} splits!\n".format(n))
+    splits = np.split(data, n)
+    mse_errorsum = 0
+    errorsum = 0
+    for i in range(len(splits)):
+        tmpsplits = np.delete(splits, i, axis=0)
+        oc = ObliqueClassifier()
+        oc.fit(np.concatenate(tuple(t for t in tmpsplits)))
+        actual_labels = splits[i][:, -1]
+        predictions = [oc.predict(r) for r in splits[i]]
+        error = error_rate(predictions, actual_labels)
+        errorsum += error
+        mse_errorsum += error ** 2
+    return errorsum / n, mse_errorsum / n
+
+
+def error_rate(predictions, labels):
+    if len(predictions) != len(labels):
+        sys.stderr.write("Incorrect array sizes ({} vs {}) please input evenly"
+                         "sized arrays!".format(len(predictions), len(labels)))
+    incorrect = 0
+    for p, l in zip(predictions, labels):
+        if p != l:
+            incorrect += 1
+    return incorrect/len(labels)
+
+
 # RUNNING SOME TESTS BREH
-print("Loading data...")
 data = get_data("Data/iris.data")
-
-print("Initializing classifier...")
-oc = ObliqueClassifier()
-
-print("Fitting classifier...")
-oc.fit(data)
-
-print("Done training. Calculating error rate...")
-labels = [oc.predict(r) for r in data]
-actual_labels = data[:, -1]
-total = len(labels)
-incorrect = 0
-for i, label in enumerate(labels):
-    if label != actual_labels[i]:
-        incorrect += 1
-print("Error rate: {}".format(incorrect/total))
+print("Error rate: {0[0]:.3f}\nMSE: {0[1]:.3f}".format(cross_validate(data)))
