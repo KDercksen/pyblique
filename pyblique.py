@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 # Koen Dercksen - 4215966
-# import impurity
 
+import impurity
 import numpy as np
 import sys
 
@@ -29,82 +30,44 @@ def get_data(fname):
 class ObliqueClassifier:
     """Oblique classifier. Can be trained on a dataset and be used to
     predict unseen records.
+
+    Currently, the classifier only accepts the gini index as a metric.
     """
 
-    def __init__(self):
+    def __init__(self, metric=impurity.gini, data=None):
+        """Metric can only be a minimizing function for now!
+        """
+        if data:
+            self.train(data)
+        self.metric = metric
+
+    def train(self, data):
         pass
 
-    def possible_splits(self, data, attr):
-        """Get a list of possible split values for a certain attribute.
-        For instance, image this:
-
-            a = [[1], [2], [3], [4]]
-            splits = possible_splits(a, 0)
-
-        Arguments:
-        ----------
-        data: array-like
-            The dataset.
-        attr: int
-            The index of the attribute you want to calculate splits for.
-        """
+    def __possible_splits(self, data, attr):
         attr_vals = np.sort(data[:, attr])
         weights = np.repeat(1.0, 2) / 2
         return np.convolve(attr_vals, weights)[1:-1]
 
-    def best_ap_split(self, data, attr, metric):
-        """Calculates the best (according to the metric) axis-parallel split
-        on a certain attribute of the dataset.
-
-        Arguments:
-        ----------
-        data: array-like
-            The dataset.
-        attr: int
-            The attribute to calculate the best split for.
-        metric: function
-            Impurity measure (use the functions from the impurity module).
-        """
-        # This part should be moving to a higher level!
+    def __best_ap_split(self, data, attr, metric):
         split_evals = {}
         for s in self.possible_splits(data, attr):
             cond = data[:, attr] <= s
             left, right = data[cond], data[~cond]
             split_evals[s] = metric(left, -1) + metric(right, -1)
-        # We need to minimize in case of gini index...
-        # Probably need to maximize for other measures :(
+        # Minimize because we're using gini index
         return min(split_evals, key=lambda x: split_evals[x])
 
-    def get_split_vector(self, data, metric):
-        """Return a list with the (locally) best splits per attribute.
-
-        Arguments:
-        ----------
-        data: array-like
-            The dataset.
-        metric: function
-            Impurity measure (use the function from the impurity module!)
-        """
+    def __get_split_vector(self, data, metric):
         n_attrs = data.shape[1] - 1
         result = [self.best_ap_split(data, i, metric) for i in range(n_attrs)]
         return np.array(result)
 
-    def split_data(data, attr, threshold):
-        """Return two lists containing the daata split.
-        The first list contains all records where the specified attribute is
-        less than or equal to a given threshold.
-        The second list contains all records where the specified attribute is
-        greater than a given threshold.
-
-        Arguments:
-        ----------
-        data: array-like
-            The dataset.
-        attr: int
-            The attribute to split on.
-        threshold: float
-            Threshold to use for splitting.
-        """
-        low = [r for r in data if r[attr] <= threshold]
-        high = [r for r in data if r[attr] > threshold]
+    def __split_data(data, attr, threshold):
+        cond = data[:, attr] <= threshold
+        low, high = data[cond], data[~cond]
         return low, high
+
+    def __is_leaf_node(self, data):
+        labels = np.array(data[:, -1])
+        return all(label == labels[0] for label in labels)
