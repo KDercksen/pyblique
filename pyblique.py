@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Koen Dercksen - 4215966
 
-# from sklearn.tree import DecisionTreeClassifier as dtc
 import impurity
 import numpy as np
 import sys
@@ -32,7 +31,7 @@ class ObliqueClassifier:
     """Oblique classifier. Can be trained on a dataset and be used to
     predict unseen records.
 
-    Currently, the classifier only accepts the gini index as a metric.
+    Currently, the classifier only uses the gini index as a metric.
     """
 
     def __init__(self, metric=impurity.gini, data=None):
@@ -49,25 +48,30 @@ class ObliqueClassifier:
     def predict(self, record):
         cls = self.tree
         while type(cls) is dict:
-            r_val = cls["index"]
-            split = cls["split"]
-            if record[r_val] <= split:
-                cls = cls["low"]
-            else:
+            splitv = cls["split"]
+            v = sum(a*x for a, x in zip(record[:-1], splitv)) + splitv[-1] > 0
+            if v:
                 cls = cls["high"]
+            else:
+                cls = cls["low"]
         return cls
 
     def __create_decision_tree(self, data):
-        isleaf, leaf = self.__is_leaf_node(data)
         if len(data) == 0:
             return -1
-        elif isleaf:
+        isleaf, leaf = self.__is_leaf_node(data)
+        if isleaf:
             return leaf
         else:
-            splitv = self.__get_split_vector(data)
-            index, split = min(enumerate(splitv), key=lambda x: x[1][1])
-            tree = {"index": index, "split": split[0]}
-            low, high = self.__split_data(data, index, split[0])
+            splits = self.__get_all_splits(data)
+            index, split = min(enumerate(splits), key=lambda x: x[1][1])
+            # in order to make this oblique, we first have to build a vector
+            # to enable the linear combination split
+            splitv = np.zeros((len(data[0]),))
+            splitv[-1] = -split[0]
+            splitv[index] = 1
+            tree = {"split": splitv}
+            low, high = self.__split_data(data, splitv)
             subtree_low = self.__create_decision_tree(low)
             tree["low"] = subtree_low
             subtree_high = self.__create_decision_tree(high)
@@ -87,39 +91,48 @@ class ObliqueClassifier:
         # Minimize because we're using gini index
         return min(split_evals.items(), key=lambda x: x[1])
 
-    def __get_split_vector(self, data):
+    def __get_all_splits(self, data):
         n_attrs = data.shape[1] - 1
         result = [self.__best_split_on_attr(data, i) for i in range(n_attrs)]
         return np.array(result)
 
-    def __split_data(self, data, attr, threshold):
-        cond = data[:, attr] <= threshold
-        low, high = data[cond], data[~cond]
-        return low, high
+    def __split_data(self, data, splitv):
+        high, low = [], []
+        for i, record in enumerate(data):
+            v = sum(a*x for a, x in zip(record[:-1], splitv)) + splitv[-1] > 0
+            if v:
+                high.append(record)
+            else:
+                low.append(record)
+        return np.array(low), np.array(high)
 
     def __is_leaf_node(self, data):
         # Returns true/false and the class label (useful if this was a leaf)
-        labels = np.array(data[:, -1])
+        labels = data[:, -1]
         label_all = labels[0]
         return all(label == label_all for label in labels), label_all
 
 
-def cross_validate(data, n=10):
+def cross_validate(data, n=5):
     # Return mean classification error, mean squared errors
     if len(data) < n:
         sys.stderr.write("Not enough data to perform {} splits!\n".format(n))
+    print("Cross-validation with {} partitions.".format(n))
     splits = np.split(data, n)
     mse_errorsum = 0
     errorsum = 0
     for i in range(len(splits)):
         tmpsplits = np.delete(splits, i, axis=0)
+        print("#{}: Creating classifier tree...".format(i + 1))
         oc = ObliqueClassifier()
+        print("#{}: Fitting classifier...".format(i + 1))
         oc.fit(np.concatenate(tuple(t for t in tmpsplits)))
         actual_labels = splits[i][:, -1]
         predictions = [oc.predict(r) for r in splits[i]]
         error = error_rate(predictions, actual_labels)
         errorsum += error
         mse_errorsum += error ** 2
+        print("#{}: Done.".format(i + 1))
     return errorsum / n, mse_errorsum / n
 
 
@@ -135,5 +148,6 @@ def error_rate(predictions, labels):
 
 
 # RUNNING SOME TESTS BREH
-data = get_data("Data/iris.data")
-print("Error rate: {0[0]:.3f}\nMSE: {0[1]:.3f}".format(cross_validate(data)))
+data = get_data("Data/xor.data")
+# error, mse = cross_validate(data, n=9)
+# print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
