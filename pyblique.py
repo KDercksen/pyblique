@@ -2,6 +2,7 @@
 # Koen Dercksen - 4215966
 
 import impurity
+from functools import partial
 import numpy as np
 from random import randint, random
 import sys
@@ -10,6 +11,7 @@ import sys
 def get_data(fname):
     try:
         data = np.genfromtxt(fname, comments="#", delimiter=",", dtype=float)
+        np.random.shuffle(data)
         return data
     except FileNotFoundError:
         sys.stderr.write("{} does not exist! Aborting.\n".format(fname))
@@ -144,29 +146,29 @@ class ObliqueClassifier:
         return all(label == label_all for label in labels), label_all
 
 
-def cross_validate(data, n=5):
+def cross_validate(data, n=5, p=print):
     # Return mean classification error, mean squared errors
     if len(data) < n:
         sys.stderr.write("Not enough data to perform {} splits!\n".format(n))
-    print("Cross-validation with {} partitions.".format(n))
+    p("Cross-validation with {} partitions.".format(n))
     splits = np.split(data, n)
     mse_errorsum = 0
     errorsum = 0
     for i in range(len(splits)):
-        print("Iteration #{}".format(i + 1))
+        p("Iteration #{}".format(i + 1))
         tmpsplits = np.delete(splits, i, axis=0)
-        print("Creating classifier tree...")
+        p("Creating classifier tree...")
         oc = ObliqueClassifier()
-        print("Fitting classifier...")
+        p("Fitting classifier...")
         oc.fit(np.concatenate(tuple(t for t in tmpsplits)))
         actual_labels = splits[i][:, -1]
-        print("Predicting leftover records...")
+        p("Predicting leftover records...")
         predictions = [oc.predict(r) for r in splits[i]]
         error = error_rate(predictions, actual_labels)
-        print("Local error rate: {:.3f}".format(error))
+        p("Local error rate: {:.3f}".format(error))
         errorsum += error
         mse_errorsum += error ** 2
-        print("Done.\n")
+        p("Done.\n")
     return errorsum / n, mse_errorsum / n
 
 
@@ -183,10 +185,15 @@ def error_rate(predictions, labels):
 
 # RUNNING SOME TESTS BREH
 data = get_data("Data/iris.data")
-# error, mse = cross_validate(data, n=10)
-# print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
-oc = ObliqueClassifier()
-oc.fit(data)
-preds = [oc.predict(r) for r in data]
-actual = data[:, -1]
-print("Error rate after training: {}".format(error_rate(preds, actual)))
+with open("output", "w") as f:
+    print("Here we go!")
+    printfunc = partial(print, file=f)
+    error, mse = cross_validate(data, n=10, p=printfunc)
+    printfunc("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
+    print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
+# oc = ObliqueClassifier()
+# print("Fitting classifier tree...")
+# oc.fit(data)
+# preds = [oc.predict(r) for r in data]
+# actual = data[:, -1]
+# print("Error rate after training: {}".format(error_rate(preds, actual)))
