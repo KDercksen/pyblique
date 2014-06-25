@@ -3,23 +3,11 @@
 
 import impurity
 import numpy as np
-from random import random
+from random import randint, random
 import sys
 
 
 def get_data(fname):
-    """Return a dictionary records/class-labels.
-    Data should be accessed by their integer identifier.
-
-        # Get the i-th record
-        rec = data[i]
-
-    Arguments:
-    ----------
-    fname: string
-        The filename of the csv file to read data from. This file should
-        contain float values exclusively!
-    """
     try:
         data = np.genfromtxt(fname, comments="#", delimiter=",", dtype=float)
         return data
@@ -58,6 +46,9 @@ class ObliqueClassifier:
         return cls
 
     def __create_decision_tree(self, data):
+        """This code is currently very slow due to the multiple splits of
+        data in various locations in the code. We need to fix this somehow...
+        """
         if len(data) == 0:
             return -1
         isleaf, leaf = self.__is_leaf_node(data)
@@ -68,18 +59,25 @@ class ObliqueClassifier:
             index, split = min(enumerate(splits), key=lambda x: x[1][1])
             # in order to make this oblique, we first have to build a vector
             # to enable the linear combination split
-            splitv = np.zeros((len(data[0]),))
-            splitv[-1] = -split[0]
-            splitv[index] = 1
-            # this doesnt quite work yet
-            # splitv = self.__perturb(data, splitv, index)
-            tree = {"split": splitv}
-            low, high = self.__split_data(data, splitv)
+            sv = np.zeros((len(data[0]),))
+            sv[-1] = -split[0]
+            sv[index] = 1
+            # perturb a random attribute in split vector 20 times
+            for c in range(20):
+                r = randint(0, len(sv) - 1)
+                sv = self.__perturb(data, sv, r)
+            tree = {"split": sv}
+            low, high = self.__split_data(data, sv)
             subtree_low = self.__create_decision_tree(low)
             tree["low"] = subtree_low
             subtree_high = self.__create_decision_tree(high)
             tree["high"] = subtree_high
         return tree
+
+    def __get_splits(self, data, attr):
+        attr_vals = np.sort(data[:, attr])
+        weights = np.repeat(1.0, 2) / 2
+        return np.convolve(attr_vals, weights)[1:-1]
 
     def __checkrel(self, record, splitv):
         return sum(a*x for a, x in zip(record[:-1], splitv)) + splitv[-1]
@@ -90,41 +88,32 @@ class ObliqueClassifier:
         return top / record[attr]
 
     def __perturb(self, data, splitv, attr):
-        # WARNING SUPER HACKY METHOD
-        # doesnt work yet i think
-        p_repl = 0.3
-        # calculate old impurity
+        # STARTING OVER LOL
         low, high = self.__split_data(data, splitv)
         old_imp = self.metric(low, -1) + self.metric(high, -1)
-        us = np.sort(np.array([self.__calc_u(r, splitv, attr) for r in data]))
-        weights = np.repeat(1.0, 2) / 2
-        split_values = np.convolve(us, weights)[1:-1]
-        splits = {}
-        for s in split_values:
-            cond = data[:, attr] <= s
-            left, right = data[cond], data[~cond]
-            splits[s] = self.metric(left, -1) + self.metric(right, -1)
-        am = min(splits.items(), key=lambda x: x[1])
-        new_splitv = np.array(splitv)
-        new_splitv[attr] = am[0]
-        # calculate new impurity
-        low, high = self.__split_data(data, new_splitv)
-        new_imp = self.metric(low, -1) + self.metric(high, -1)
-        if old_imp > new_imp:
-            return splitv
-        elif old_imp == new_imp:
-            if random() < p_repl:
-                return new_splitv
-            else:
-                return splitv
-        else:
-            return new_splitv
+        # first calculate all values of U with the current value in splitv
+        # for attr
+        us = np.array(sorted([[self.__calc_u(r, splitv, attr)] for r in data]))
+        possplits = self.__get_splits(us, 0)
+        # now find the best of these splits...
+        amvalues = {}
+        for s in possplits:
+            newsplitv = np.array(splitv)
+            newsplitv[attr] = s
+            low, high = self.__split_data(data, newsplitv)
+            imp = self.metric(low, -1) + self.metric(high, -1)
+            amvalues[s] = (imp, newsplitv)
+        bestnewimp, bestnewsplit = min(amvalues.values(), key=lambda x: x[0])
+        if bestnewimp > old_imp:
+            return bestnewsplit
+        elif bestnewimp == old_imp:
+            if random() < 0.3:
+                return bestnewsplit
+        return splitv
 
     def __best_split_on_attr(self, data, attr):
         # Will return a tuple of (split test, split value).
-        attr_vals = np.sort(data[:, attr])
-        weights = np.repeat(1.0, 2) / 2
-        split_values = np.convolve(attr_vals, weights)[1:-1]
+        split_values = self.__get_splits(data, attr)
         split_evals = {}
         for s in split_values:
             cond = data[:, attr] <= s
@@ -194,5 +183,10 @@ def error_rate(predictions, labels):
 
 # RUNNING SOME TESTS BREH
 data = get_data("Data/iris.data")
-error, mse = cross_validate(data, n=10)
-print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
+# error, mse = cross_validate(data, n=10)
+# print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
+oc = ObliqueClassifier()
+oc.fit(data)
+preds = [oc.predict(r) for r in data]
+actual = data[:, -1]
+print("Error rate after training: {}".format(error_rate(preds, actual)))
