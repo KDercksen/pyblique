@@ -146,7 +146,17 @@ class ObliqueClassifier:
         return all(label == label_all for label in labels), label_all
 
 
-def cross_validate(data, n=5, p=print):
+class tee:
+
+    def __init__(self, *args):
+        self.outputs = args
+
+    def __call__(self, s, end="\n"):
+        for o in self.outputs:
+            o.write(str(s) + end)
+
+
+def cross_validate(data, p, n=5):
     # Return mean classification error, mean squared errors
     if len(data) < n:
         sys.stderr.write("Not enough data to perform {} splits!\n".format(n))
@@ -186,9 +196,8 @@ def error_rate(predictions, labels):
 # RUNNING SOME TESTS BREH
 data = get_data("Data/iris.data")
 with open("output", "w") as f:
-    print("Here we go!")
-    printfunc = partial(print, file=f)
-    error, mse = cross_validate(data, n=10, p=printfunc)
+    printfunc = tee(sys.stdout, f)
+    error, mse = cross_validate(data, printfunc, n=10)
     printfunc("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
     print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
 # oc = ObliqueClassifier()
