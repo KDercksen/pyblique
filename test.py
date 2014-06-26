@@ -42,8 +42,10 @@ def run(fname, folds):
 if __name__ == "__main__":
     files = os.listdir("Data")
     files = [f.split(".")[0] for f in files]
+    if not os.path.exists("Results"):
+        os.makedirs("Results")
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--folds", default = 10, type=int,
+    parser.add_argument("-f", "--folds", default=10, type=int,
                         help="Amount of folds")
     parser.add_argument("data", type=str, help="Name of dataset",
                         choices=files)
