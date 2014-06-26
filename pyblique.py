@@ -49,7 +49,7 @@ class ObliqueClassifier:
 
     def __create_decision_tree(self, data):
         """This code is currently very slow due to the multiple splits of
-        data in various locations in the code. We need to fix this somehow...
+        data in various locations in the code. I need to fix this somehow...
         """
         if len(data) == 0:
             return -1
@@ -64,10 +64,12 @@ class ObliqueClassifier:
             sv = np.zeros((len(data[0]),))
             sv[-1] = -split[0]
             sv[index] = 1
+            low, high = self.__split_data(data, sv)
+            imp = self.metric(low, -1) + self.metric(high, -1)
             # perturb a random attribute in split vector 20 times
-            for c in range(20):
+            for c in range(10):
                 r = randint(0, len(sv) - 1)
-                sv = self.__perturb(data, sv, r)
+                imp, sv = self.__perturb(data, sv, r, imp)
             tree = {"split": sv}
             low, high = self.__split_data(data, sv)
             subtree_low = self.__create_decision_tree(low)
@@ -89,10 +91,7 @@ class ObliqueClassifier:
         top = am * record[attr] - self.__checkrel(record, splitv)
         return top / record[attr]
 
-    def __perturb(self, data, splitv, attr):
-        # STARTING OVER LOL
-        low, high = self.__split_data(data, splitv)
-        old_imp = self.metric(low, -1) + self.metric(high, -1)
+    def __perturb(self, data, splitv, attr, old_imp):
         # first calculate all values of U with the current value in splitv
         # for attr
         us = np.array(sorted([[self.__calc_u(r, splitv, attr)] for r in data]))
@@ -107,11 +106,11 @@ class ObliqueClassifier:
             amvalues[s] = (imp, newsplitv)
         bestnewimp, bestnewsplit = min(amvalues.values(), key=lambda x: x[0])
         if bestnewimp > old_imp:
-            return bestnewsplit
+            return bestnewimp, bestnewsplit
         elif bestnewimp == old_imp:
             if random() < 0.3:
-                return bestnewsplit
-        return splitv
+                return bestnewimp, bestnewsplit
+        return old_imp, splitv
 
     def __best_split_on_attr(self, data, attr):
         # Will return a tuple of (split test, split value).
@@ -146,42 +145,6 @@ class ObliqueClassifier:
         return all(label == label_all for label in labels), label_all
 
 
-class tee:
-
-    def __init__(self, *args):
-        self.outputs = args
-
-    def __call__(self, s, end="\n"):
-        for o in self.outputs:
-            o.write(str(s) + end)
-
-
-def cross_validate(data, p, n=5):
-    # Return mean classification error, mean squared errors
-    if len(data) < n:
-        sys.stderr.write("Not enough data to perform {} splits!\n".format(n))
-    p("Cross-validation with {} partitions.".format(n))
-    splits = np.split(data, n)
-    mse_errorsum = 0
-    errorsum = 0
-    for i in range(len(splits)):
-        p("Iteration #{}".format(i + 1))
-        tmpsplits = np.delete(splits, i, axis=0)
-        p("Creating classifier tree...")
-        oc = ObliqueClassifier()
-        p("Fitting classifier...")
-        oc.fit(np.concatenate(tuple(t for t in tmpsplits)))
-        actual_labels = splits[i][:, -1]
-        p("Predicting leftover records...")
-        predictions = [oc.predict(r) for r in splits[i]]
-        error = error_rate(predictions, actual_labels)
-        p("Local error rate: {:.3f}".format(error))
-        errorsum += error
-        mse_errorsum += error ** 2
-        p("Done.\n")
-    return errorsum / n, mse_errorsum / n
-
-
 def error_rate(predictions, labels):
     if len(predictions) != len(labels):
         sys.stderr.write("Incorrect array sizes ({} vs {}) please input evenly"
@@ -191,18 +154,3 @@ def error_rate(predictions, labels):
         if p != l:
             incorrect += 1
     return incorrect/len(labels)
-
-
-# RUNNING SOME TESTS BREH
-data = get_data("Data/iris.data")
-with open("output", "w") as f:
-    printfunc = tee(sys.stdout, f)
-    error, mse = cross_validate(data, printfunc, n=10)
-    printfunc("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
-    print("Error rate: {:.3f}\nMSE: {:.3f}".format(error, mse))
-# oc = ObliqueClassifier()
-# print("Fitting classifier tree...")
-# oc.fit(data)
-# preds = [oc.predict(r) for r in data]
-# actual = data[:, -1]
-# print("Error rate after training: {}".format(error_rate(preds, actual)))

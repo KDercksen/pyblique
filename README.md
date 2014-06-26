@@ -1,3 +1,3 @@
 pyblique
 ========
-Oblique Decision Tree implementation in Python.
+OC1 implementation in Python.
