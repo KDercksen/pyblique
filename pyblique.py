@@ -83,7 +83,7 @@ class ObliqueClassifier:
         return np.convolve(attr_vals, weights)[1:-1]
 
     def __checkrel(self, record, splitv):
-        return sum(a*x for a, x in zip(record[:-1], splitv)) + splitv[-1]
+        return np.sum(np.multiply(record[:-1], splitv[:-1])) + splitv[-1]
 
     def __calc_u(self, record, splitv, attr):
         am = splitv[attr]
