@@ -128,14 +128,20 @@ class ObliqueClassifier:
         return np.array(result)
 
     def __split_data(self, data, splitv):
-        high, low = [], []
-        for i, record in enumerate(data):
+        high = np.zeros(data.shape)
+        low = np.zeros(data.shape)
+        ihigh, ilow = 0, 0
+        for record in data:
             v = self.__checkrel(record, splitv) > 0
             if v:
-                high.append(record)
+                high[ihigh] = record
+                ihigh += 1
             else:
-                low.append(record)
-        return np.array(low), np.array(high)
+                low[ilow] = record
+                ilow += 1
+        high = high[~np.all(high == 0, axis=1)]
+        low = low[~np.all(low == 0, axis=1)]
+        return low, high
 
     def __is_leaf_node(self, data):
         # Returns true/false and the class label (useful if this was a leaf)
