@@ -1,0 +1,120 @@
+Validating classifier with 5-fold test...
+Iteration #1
+Error: 0.033
+Elapsed time: 10.214 seconds
+
+Iteration #2
+Error: 0.100
+Elapsed time: 7.473 seconds
+
+Iteration #3
+Error: 0.067
+Elapsed time: 10.534 seconds
+
+Iteration #4
+Error: 0.067
+Elapsed time: 7.433 seconds
+
+Iteration #5
+Error: 0.000
+Elapsed time: 10.323 seconds
+
+Average error: 0.053
+Total elapsed time: 46.013 seconds.
+Average elapsed time: 9.203 seconds.
+Validating classifier with 5-fold test...
+Iteration #1
+Error: 0.033
+Elapsed time: 10.197 seconds
+
+Iteration #2
+Error: 0.067
+Elapsed time: 7.590 seconds
+
+Iteration #3
+Error: 0.133
+Elapsed time: 8.458 seconds
+
+Iteration #4
+Error: 0.067
+Elapsed time: 12.143 seconds
+
+Iteration #5
+Error: 0.100
+Elapsed time: 8.481 seconds
+
+Average error: 0.080
+Total elapsed time: 46.907 seconds.
+Average elapsed time: 9.381 seconds.
+Validating classifier with 5-fold test...
+Iteration #1
+Error: 0.100
+Elapsed time: 8.925 seconds
+
+Iteration #2
+Error: 0.133
+Elapsed time: 9.680 seconds
+
+Iteration #3
+Error: 0.033
+Elapsed time: 8.495 seconds
+
+Iteration #4
+Error: 0.033
+Elapsed time: 9.722 seconds
+
+Iteration #5
+Error: 0.100
+Elapsed time: 10.845 seconds
+
+Average error: 0.080
+Total elapsed time: 47.705 seconds.
+Average elapsed time: 9.541 seconds.
+Validating classifier with 5-fold test...
+Iteration #1
+Error: 0.100
+Elapsed time: 4.596 seconds
+
+Iteration #2
+Error: 0.067
+Elapsed time: 10.666 seconds
+
+Iteration #3
+Error: 0.067
+Elapsed time: 10.380 seconds
+
+Iteration #4
+Error: 0.067
+Elapsed time: 8.803 seconds
+
+Iteration #5
+Error: 0.167
+Elapsed time: 8.850 seconds
+
+Average error: 0.093
+Total elapsed time: 43.334 seconds.
+Average elapsed time: 8.667 seconds.
+Validating classifier with 5-fold test...
+Iteration #1
+Error: 0.067
+Elapsed time: 12.773 seconds
+
+Iteration #2
+Error: 0.167
+Elapsed time: 6.823 seconds
+
+Iteration #3
+Error: 0.067
+Elapsed time: 8.388 seconds
+
+Iteration #4
+Error: 0.067
+Elapsed time: 10.819 seconds
+
+Iteration #5
+Error: 0.033
+Elapsed time: 7.990 seconds
+
+Average error: 0.080
+Total elapsed time: 46.830 seconds.
+Average elapsed time: 9.366 seconds.
