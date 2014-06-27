@@ -25,7 +25,7 @@ class ObliqueClassifier:
     """
 
     def __init__(self, metric=impurity.gini, data=None):
-        """Metric can only be a minimizing function for now!
+        """Metric can only be a minimizing function!
         """
         if data:
             self.train(data)
@@ -47,9 +47,6 @@ class ObliqueClassifier:
         return cls
 
     def __create_decision_tree(self, data):
-        """This code is currently very slow due to the multiple splits of
-        data in various locations in the code. I need to fix this somehow...
-        """
         if len(data) == 0:
             return -1
         isleaf, leaf = self.__is_leaf_node(data)

@@ -1,9 +1,12 @@
 # Unimportant stuff
+__pycache__
 *.pyc
 *.dvi
 *.aux
+*.out
 *.pdf
 *.log
-*.synctex
+*.gz
+*.synctex.gz
 *.blg
 *.bbl

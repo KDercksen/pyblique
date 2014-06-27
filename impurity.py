@@ -1,9 +1,8 @@
-# Koen Dercksen - 4215966
 # Module containing impurity metrics.
 
 from collections import Counter
-import sys
 import numpy as np
+import sys
 import time
 
 

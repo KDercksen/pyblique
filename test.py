@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pyblique import get_data, ObliqueClassifier, error_rate
+from pyblique import error_rate, get_data, ObliqueClassifier
 from sklearn.cross_validation import KFold
 import argparse
 import os

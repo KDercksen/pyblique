@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# This little transformation makes the dataset a lot smaller
+# but the classifier still takes absolute ages to fit it.
 
 from pyblique import get_data
 from sklearn.decomposition import PCA
