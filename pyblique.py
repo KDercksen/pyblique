@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # Koen Dercksen - 4215966
 
-import impurity
-from functools import partial
-import numpy as np
 from random import randint, random
+import impurity
+import numpy as np
 import sys
 
 
