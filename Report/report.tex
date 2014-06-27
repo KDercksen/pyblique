@@ -48,7 +48,7 @@ The algorithm examined in this article tests linear combinations of attributes a
 \begin{align} \label{eq:obliquetest}
 \sum\limits_{i = 0}^{d} (a_i x_i) + a_{d + 1} > 0
 \end{align}
-at every node, where $a_1, \ldots, a_{d + 1}$ are real-valued coefficients. An oblique split visualization can be seen in \cref{fig:obliquesplit}). Recreating axis-parallel splits while using tests of the form specified in \cref{eq:obliquetest} is very easy, since by choosing $a_i = 0$ for every $i$ except one the test becomes univariate.
+at every node, where $a_1, \ldots, a_{d + 1}$ are real-valued coefficients. An oblique split visualization can be seen in \cref{fig:obliquesplit}. Recreating axis-parallel splits while using tests of the form specified in \cref{eq:obliquetest} is very easy, since by choosing $a_i = 0$ for every $i$ except one the test becomes univariate (see \cref{app:code} for the implementation).
 
 \begin{figure}[!ht]
 \centering
@@ -57,7 +57,7 @@ at every node, where $a_1, \ldots, a_{d + 1}$ are real-valued coefficients. An o
 \label{fig:obliquesplit}
 \end{figure}
 
-I've implemented an oblique DT classifier, using previous work by Murthy, Kasif and Salzberg \cite{KSM:1994} as a reference. See \cref{app:code} for the implementation.
+I've implemented an oblique DT classifier, using previous work by Murthy, Kasif and Salzberg \cite{KSM:1994} as a reference.
 
 \section{Decision Tree Induction}
 The basic algorithm for top-down DT induction is as follows:
