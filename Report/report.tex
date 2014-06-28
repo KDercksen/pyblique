@@ -119,9 +119,10 @@ Run nr. & \multicolumn{5}{c}{Error rate} & Avg. error rate \\ \hline
 
 \appendix
 \section{Code listing} \label{app:code}
-The full implementation can be found at \href{http://github.com/KDercksen/pyblique}{my Github}. I used \href{http://www.python.org}{Python 3} and various libraries from the \href{http://www.scipy.org}{Scipy stack}. Some interesting functions are listed below.
+The full implementation can be found at \href{http://github.com/KDercksen/pyblique}{my Github}. I used \href{http://www.python.org}{Python 3} and various libraries from the \href{http://www.scipy.org}{Scipy stack} and \href{http://www.scikit-learn.org}{scikit-learn}. Some interesting functions are listed below.
 
 \subsection{Decision Tree Creation}
+This is the function that actually creates the decision tree.
 \begin{lstlisting}[language=Python]
 def __create_decision_tree(self, data):
     if len(data) == 0:
@@ -171,6 +172,7 @@ def __best_split_on_attr(self, data, attr):
 \end{lstlisting}
 
 \subsection{Perturbation}
+This is the function that perturbs the initial axis-parallel split vector.
 \begin{lstlisting}[language=Python]
 def __perturb(self, data, splitv, attr, old_imp):
     # first calculate all values of U with the current 
@@ -178,7 +180,7 @@ def __perturb(self, data, splitv, attr, old_imp):
     us = np.array(sorted([[self.__calc_u(r, splitv, attr)]
                   for r in data]))
     possplits = self.__get_splits(us, 0)
-    # now find the best of these splits...
+    # now find the best of these splits..
     amvalues = {}
     for s in possplits:
         newsplitv = np.array(splitv)
