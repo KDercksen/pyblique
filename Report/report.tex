@@ -89,6 +89,9 @@ When finding oblique splits, considering all possible tests at every node in ord
 
 While testing my implementation, I found that it scaled very badly to larger datasets. The classifier easily fits Iris flower dataset in a normal timeframe, however datasets of sizes akin to $8000x10$ took forever to fit. This might be due to a combination of the problem being hard and a possibly bad implementation.
 
+\subsubsection{Scalability}
+As mentioned, my implementation scales very badly to larger datasets. I tried using my algorithm on the \emph{ISOLET} dataset \cite{Bache+Lichman:2013}, which is around 8000x600 originally. I used PCA to bring the dimensionality down to 10, so the dataset became 8000x10. I then let the classifier train whilst I was out for the day; it still wasn't done when I got back.
+
 \subsection{Similar algorithms}
 My work is largely based on the paper on OC1 by Murthy, Kasif and Salzberg \cite{KSM:1994}. Their algorithm has a few more fancy things about it that didn't make it into my implementation. For example, OC1 includes two types of randomization to escape local minima that I have left out. I have not implemented pruning either. I left these features out largely due to time constraints.
 
