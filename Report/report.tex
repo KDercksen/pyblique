@@ -74,7 +74,7 @@ My version of the oblique DT algorithm initializes every node as the best axis-p
 \item Take a dataset $T$ and choose an attribute $i$ to split on (all attributes are considered).
 \item Sort $T$ according to each examples value for $x_i$ where $i$ is the attribute you chose.
 \item Calculate all midpoints between the sorted $x_i$'s and use those as possible splits.
-\item For every possible split $s'$, divide $T$ into subsets according to \cref{eq:obliquetest} where we set all $a = 0$ except for $a_i$, which we set to $s'$, and $a_{d+1}$ which we set to $-s'$. Store the impurity of each such split.
+\item For every possible split $s'$, divide $T$ into subsets according to \cref{eq:obliquetest} where we set all $a = 0$ except for $a_i$, which we set to $1$, and $a_{d+1}$ which we set to $-s'$. Store the impurity of each such split.
 \item Choose the value for $a_i$ that results in the highest purity split.
 \end{enumerate}
 
